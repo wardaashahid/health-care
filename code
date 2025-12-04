@@ -1,0 +1,500 @@
+#include <iostream>
+#include <string>
+#include <iomanip>
+#include <cstdlib>
+#include <ctime>
+
+using namespace std;
+
+class FamilyHistory {
+private:
+    string commondiseases[10];
+    bool hasdisease[10];
+public:
+    FamilyHistory() {
+        commondiseases[0] = "heart disease";
+        commondiseases[1] = "diabetes";
+        commondiseases[2] = "hypertension";
+        commondiseases[3] = "cancer";
+        commondiseases[4] = "asthma";
+        commondiseases[5] = "obesity";
+        commondiseases[6] = "stroke";
+        commondiseases[7] = "alzheimer";
+        commondiseases[8] = "osteoporosis";
+        commondiseases[9] = "kidney disease";
+        for (int i = 0; i < 10; i++)
+            hasdisease[i] = false;
+    }
+
+    void inputhistory() {
+        cout << "\nselect inherited diseases in your family by number (0 to finish):\n";
+        for (int i = 0; i < 10; i++)
+            cout << i + 1 << ". " << commondiseases[i] << endl;
+        int choice;
+        while (true) {
+            cout << "enter number (0 to finish): ";
+            cin >> choice;
+            if (choice == 0) break;
+            if (choice >= 1 && choice <= 10) hasdisease[choice - 1] = true;
+            else cout << "invalid number.\n";
+        }
+    }
+
+    void display() {
+        cout << "family diseases: ";
+        bool any = false;
+        for (int i = 0; i < 10; i++) {
+            if (hasdisease[i]) {
+                cout << commondiseases[i] << " ";
+                any = true;
+            }
+        }
+        if (!any) cout << "none";
+        cout << endl;
+    }
+};
+
+class MedicalInfo {
+public:
+    double height;
+    double weight;
+    string chronicdisease;
+    FamilyHistory family;
+
+    void inputmedicalinfo() {
+        do {
+            cout << "enter height (meters): ";
+            cin >> height;
+            if (height <= 0 || height > 3) cout << "invalid height.\n";
+        } while (height <= 0 || height > 3);
+
+        do {
+            cout << "enter weight (kg): ";
+            cin >> weight;
+            if (weight < 20 || weight > 500) cout << "invalid weight.\n";
+        } while (weight < 20 || weight > 500);
+
+        cout << "your bmi: " << fixed << setprecision(2) << (weight / (height * height)) << endl;
+
+        cin.ignore();
+        cout << "any chronic disease? (none if no): ";
+        getline(cin, chronicdisease);
+
+        family.inputhistory();
+    }
+
+    double calculatebmi() {
+        return weight / (height * height);
+    }
+};
+
+class HealthMetric {
+protected:
+    string date;
+public:
+    HealthMetric() { date = ""; }
+    virtual void inputdata() = 0;
+    virtual void display() = 0;
+    virtual double getvalue() = 0;
+    virtual string gettype() = 0;
+    virtual ~HealthMetric() {}
+};
+
+class Steps : public HealthMetric {
+private:
+    int steps;
+public:
+    Steps() { steps = 0; }
+    void inputdata() {
+        do {
+            cout << "enter steps: ";
+            cin >> steps;
+            if (steps < 0 || steps > 100000) cout << "invalid steps.\n";
+        } while (steps < 0 || steps > 100000);
+    }
+    void display() { cout << "steps: " << steps << endl; }
+    double getvalue() { return steps; }
+    string gettype() { return "steps"; }
+};
+
+class HeartRate : public HealthMetric {
+private:
+    int rate;
+public:
+    HeartRate() { rate = 0; }
+    void inputdata() {
+        do {
+            cout << "enter heart rate (bpm): ";
+            cin >> rate;
+            if (rate < 30 || rate > 220) cout << "invalid heart rate.\n";
+        } while (rate < 30 || rate > 220);
+
+        if (rate < 60) cout << "warning: bradycardia (low heart rate)\n";
+        else if (rate > 100) cout << "warning: tachycardia (high heart rate)\n";
+        else cout << "heart rate is normal.\n";
+    }
+    void display() {
+        cout << "heart rate: " << rate << " bpm\n";
+        if (rate < 60) cout << "warning: bradycardia (low heart rate)\n";
+        else if (rate > 100) cout << "warning: tachycardia (high heart rate)\n";
+    }
+    double getvalue() { return rate; }
+    string gettype() { return "heartrate"; }
+};
+
+class Calories : public HealthMetric {
+private:
+    int cal;
+public:
+    Calories() { cal = 0; }
+    void inputdata() {
+        do {
+            cout << "enter calories consumed: ";
+            cin >> cal;
+            if (cal < 0 || cal > 20000) cout << "invalid calories.\n";
+        } while (cal < 0 || cal > 20000);
+    }
+    void display() { cout << "calories: " << cal << endl; }
+    double getvalue() { return cal; }
+    string gettype() { return "calories"; }
+};
+
+class Sleep : public HealthMetric {
+private:
+    double hours;
+public:
+    Sleep() { hours = 0; }
+    void inputdata() {
+        do {
+            cout << "enter sleep hours: ";
+            cin >> hours;
+            if (hours < 0 || hours > 24) cout << "invalid hours.\n";
+        } while (hours < 0 || hours > 24);
+    }
+    void display() { cout << "sleep: " << hours << " hrs\n"; }
+    double getvalue() { return hours; }
+    string gettype() { return "sleep"; }
+};
+
+class Water : public HealthMetric {
+private:
+    double liters;
+public:
+    Water() { liters = 0; }
+    void inputdata() {
+        do {
+            cout << "enter water intake (liters): ";
+            cin >> liters;
+            if (liters < 0 || liters > 10) cout << "invalid liters.\n";
+        } while (liters < 0 || liters > 10);
+    }
+    void display() { cout << "water intake: " << liters << " l\n"; }
+    double getvalue() { return liters; }
+    string gettype() { return "water"; }
+};
+
+class WeightMetric : public HealthMetric {
+private:
+    double kg;
+public:
+    WeightMetric() { kg = 0; }
+    void inputdata() {
+        do {
+            cout << "enter weight today (kg): ";
+            cin >> kg;
+            if (kg < 20 || kg > 500) cout << "invalid weight.\n";
+        } while (kg < 20 || kg > 500);
+    }
+    void display() { cout << "weight: " << kg << " kg\n"; }
+    double getvalue() { return kg; }
+    string gettype() { return "weight"; }
+};
+
+class Emotion {
+public:
+    string mood;
+    Emotion() : mood("neutral") {}
+    void inputemotion() {
+        cout << "how are you feeling today? (happy/sad/stressed/neutral/angry): ";
+        cin >> mood;
+    }
+    void display() { cout << "mood: " << mood << endl; }
+};
+
+class Symptom {
+public:
+    string description;
+    int severity;
+    Symptom() : description(""), severity(1) {}
+    void inputsymptom() {
+        cin.ignore();
+        cout << "describe symptom: ";
+        getline(cin, description);
+        do {
+            cout << "severity (1-10): ";
+            cin >> severity;
+            if (severity < 1 || severity > 10) cout << "invalid severity.\n";
+        } while (severity < 1 || severity > 10);
+    }
+    void display() {
+        cout << "symptom: " << description << " | severity: " << severity;
+        if (severity < 5) cout << " | advice: take pills and rest\n";
+        else cout << " | advice: seek medical attention!\n";
+    }
+};
+
+class Recipe {
+public:
+    string name;
+    string tag;
+    Recipe() : name(""), tag("") {}
+};
+
+class User {
+public:
+    string name;
+    int age;
+    string userid;
+    MedicalInfo medinfo;
+
+    HealthMetric* metrics[50];
+    int metriccount;
+
+    Emotion emotions[50];
+    int emocount;
+
+    Symptom symptoms[50];
+    int sympcount;
+
+    Recipe recipes[10];
+    int recipecount;
+
+    User() {
+        metriccount = 0;
+        emocount = 0;
+        sympcount = 0;
+        recipecount = 0;
+        userid = "USR-" + to_string(rand() % 9000 + 1000);
+        for (int i = 0; i < 50; i++) metrics[i] = nullptr;
+    }
+
+    ~User() {
+        for (int i = 0; i < metriccount; i++) {
+            delete metrics[i];
+            metrics[i] = nullptr;
+        }
+    }
+
+    double calculateDailyScore() {
+        double score = 0;
+        double steps = 0, sleep = 0, water = 0;
+
+        for (int i = 0; i < metriccount; i++) {
+            string t = metrics[i]->gettype();
+            if (t == "steps") steps = metrics[i]->getvalue();
+            if (t == "sleep") sleep = metrics[i]->getvalue();
+            if (t == "water") water = metrics[i]->getvalue();
+        }
+
+        score += min(steps / 10000.0, 1.0) * 30.0;
+        score += min(sleep / 8.0, 1.0) * 30.0;
+        score += min(water / 3.0, 1.0) * 20.0;
+
+        if (emocount > 0) {
+            string latest = emotions[emocount - 1].mood;
+            if (latest == "happy") score += 20.0;
+            if (latest == "stressed") score -= 10.0;
+        }
+
+        if (score < 0) score = 0;
+        if (score > 100) score = 100;
+
+        return score;
+    }
+
+    void initrecipes() {
+        recipecount = 6;
+        recipes[0].name = "grilled chicken salad";    recipes[0].tag = "low-calorie protein";
+        recipes[1].name = "oatmeal with fruits";      recipes[1].tag = "heart-friendly fiber";
+        recipes[2].name = "protein smoothie";         recipes[2].tag = "high-protein";
+        recipes[3].name = "quinoa veg bowl";          recipes[3].tag = "vegetarian fiber";
+        recipes[4].name = "baked fish with veggies";  recipes[4].tag = "heart-friendly protein";
+        recipes[5].name = "chickpea salad";           recipes[5].tag = "vegetarian high-protein";
+    }
+
+    void suggestrecipe(string preference) {
+        cout << "\n--- Recipe Suggestions ---\n";
+        bool found = false;
+        for (int i = 0; i < recipecount; i++) {
+            if (recipes[i].tag.find(preference) != string::npos) {
+                cout << "- " << recipes[i].name << " [" << recipes[i].tag << "]\n";
+                found = true;
+            }
+        }
+        if (!found) cout << "No recipes match this health preference.\n";
+    }
+
+    void generatereport() {
+        cout << "\n===== DAILY HEALTH REPORT =====\n";
+        cout << "User: " << name << " (" << userid << ")\n";
+
+        double bmi = medinfo.calculatebmi();
+        cout << "BMI: " << fixed << setprecision(2) << bmi << "\n";
+
+        double score = calculateDailyScore();
+        cout << "Daily Health Score: " << fixed << setprecision(2) << score << "/100\n";
+
+        if (score > 80.0) cout << "Great job! You're doing amazing! 💪\n";
+        else if (score > 60.0) cout << "Good work! Thora aur effort! 🌱\n";
+        else cout << "You need to improve today. Start with water & steps ✓\n";
+
+        medinfo.family.display();
+
+        cout << "\nMetrics:\n";
+        if (metriccount == 0) cout << "No metrics recorded yet.\n";
+        for (int i = 0; i < metriccount; i++) {
+            metrics[i]->display();
+            if (metrics[i]->gettype() == "calories") {
+                int cal = static_cast<int>(metrics[i]->getvalue());
+                if (bmi >= 25 && cal > 2500) cout << "warning: high calories for your bmi.\n";
+            }
+            if (metrics[i]->gettype() == "sleep") {
+                double hrs = metrics[i]->getvalue();
+                if (hrs < 6) cout << "warning: sleep deprived, aim for 7-9 hrs.\n";
+                else if (hrs > 10) cout << "warning: oversleeping, check lifestyle.\n";
+            }
+        }
+
+        cout << "\nEmotions:\n";
+        if (emocount == 0) cout << "No emotions recorded yet.\n";
+        for (int i = 0; i < emocount; i++) emotions[i].display();
+
+        cout << "\nSymptoms:\n";
+        if (sympcount == 0) cout << "No symptoms recorded.\n";
+        for (int i = 0; i < sympcount; i++) symptoms[i].display();
+    }
+};
+
+class Tracker {
+private:
+    User* user;
+public:
+    Tracker(User* u) : user(u) {}
+
+    void addmetric() {
+        int ch;
+        cout << "select metric: 1.steps 2.heartrate 3.calories 4.sleep 5.water 6.weight: ";
+        cin >> ch;
+        if (user->metriccount >= 50) { cout << "max metrics reached.\n"; return; }
+
+        HealthMetric* m = nullptr;
+        switch (ch) {
+        case 1: m = new Steps(); break;
+        case 2: m = new HeartRate(); break;
+        case 3: m = new Calories(); break;
+        case 4: m = new Sleep(); break;
+        case 5: m = new Water(); break;
+        case 6: m = new WeightMetric(); break;
+        default: cout << "invalid choice\n"; return;
+        }
+
+        m->inputdata();
+        user->metrics[user->metriccount] = m;
+        user->metriccount++;
+    }
+
+    void addemotion() {
+        if (user->emocount >= 50) { cout << "max emotions reached.\n"; return; }
+        user->emotions[user->emocount].inputemotion();
+        user->emocount++;
+    }
+
+    void addsymptom() {
+        if (user->sympcount >= 50) { cout << "max symptoms reached.\n"; return; }
+        user->symptoms[user->sympcount].inputsymptom();
+        user->sympcount++;
+    }
+
+    void showstatussummary() {
+        cout << "\n----- USER STATUS SUMMARY -----\n";
+        cout << "Name: " << user->name << " | ID: " << user->userid << " | Age: " << user->age << "\n";
+        double bmi = user->medinfo.calculatebmi();
+        cout << "BMI: " << fixed << setprecision(2) << bmi;
+        if (bmi < 18.5) cout << " (Underweight)";
+        else if (bmi < 25) cout << " (Normal)";
+        else if (bmi < 30) cout << " (Overweight)";
+        else cout << " (Obese)";
+        cout << "\n";
+
+        double lastSteps = 0, lastSleep = 0, lastWater = 0;
+        if (user->metriccount > 0) {
+            for (int i = user->metriccount - 1; i >= 0; i--) {
+                string t = user->metrics[i]->gettype();
+                if (lastSteps == 0 && t == "steps") lastSteps = user->metrics[i]->getvalue();
+                if (lastSleep == 0 && t == "sleep") lastSleep = user->metrics[i]->getvalue();
+                if (lastWater == 0 && t == "water") lastWater = user->metrics[i]->getvalue();
+            }
+        }
+        cout << "Latest recorded - Steps: " << lastSteps << " | Sleep: " << lastSleep << " hrs | Water: " << lastWater << " l\n";
+        double score = user->calculateDailyScore();
+        cout << "Daily Score Preview: " << fixed << setprecision(2) << score << "/100\n";
+        cout << "-------------------------------\n";
+    }
+
+    void menu() {
+        int choice;
+        do {
+            cout << "\n===== TRACKER MENU =====\n";
+            cout << "User: " << user->name << " (" << user->userid << ")\n";
+            cout << "1. Add Metric\n";
+            cout << "2. Add Emotion\n";
+            cout << "3. Add Symptom\n";
+            cout << "4. View Report\n";
+            cout << "5. Suggest Recipe\n";
+            cout << "6. Status Summary\n";
+            cout << "7. Exit\n";
+            cout << "Choice: ";
+            cin >> choice;
+
+            switch (choice) {
+            case 1: addmetric(); break;
+            case 2: addemotion(); break;
+            case 3: addsymptom(); break;
+            case 4: user->generatereport(); break;
+            case 5: {
+                string pref;
+                cout << "Enter preference (e.g. low-calorie / heart-friendly / high-protein / vegetarian / fiber / protein): ";
+                cin >> ws;
+                getline(cin, pref);
+                user->suggestrecipe(pref);
+                break;
+            }
+            case 6: showstatussummary(); break;
+            case 7: cout << "Goodbye!\n"; break;
+            default: cout << "Invalid choice!\n";
+            }
+        } while (choice != 7);
+    }
+};
+
+int main() {
+    srand(static_cast<unsigned int>(time(nullptr)));
+
+    User user;
+    cout << "enter your name: ";
+    cin >> ws;
+    getline(cin, user.name);
+
+    cout << "enter your age: ";
+    cin >> user.age;
+
+    user.medinfo.inputmedicalinfo();
+
+    user.initrecipes();
+
+    Tracker tracker(&user);
+    tracker.menu();
+
+    return 0;
+}
+ 
